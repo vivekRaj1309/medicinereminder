@@ -1,6 +1,7 @@
 package com.springboot.medicinereminder.Scheduler;
 
 import com.springboot.medicinereminder.Repositories.FrequencyRepository;
+import com.springboot.medicinereminder.Repositories.StockRepository;
 import com.springboot.medicinereminder.models.Frequency;
 import com.springboot.medicinereminder.models.Medicine;
 import com.springboot.medicinereminder.service.TwilioService;
@@ -19,6 +20,8 @@ import java.util.Set;
 @EnableScheduling
 public class MedicationFrequencyScheduler {
     @Autowired
+    StockRepository stockRepository;
+    @Autowired
     FrequencyRepository frequencyRepository;
     @Autowired
     TwilioService twilioService;
@@ -32,9 +35,16 @@ public class MedicationFrequencyScheduler {
             List<Medicine> medicineList = currFrequency.getMedicines();
             Set<Medicine> medicines = new HashSet<>(medicineList);
             for(Medicine medicine:medicines){
-                messageBuilder.append(medicine.getName() + " ");
+                messageBuilder.append(medicine.getName() + " : " + medicine.getDosage() + ", ");
+                int currStock = medicine.getStock().getValue();
+                if(currStock < 10){
+                    twilioService.sendSms("", "Kindly refill/restock " + medicine.getName() + ".");
+                } else if (currStock > 0) {
+                    int updatedStock = currStock-medicine.getDosage();
+                    stockRepository.
+                }
             }
-            twilioService.sendSms("+919162018811", messageBuilder.toString());
+            twilioService.sendSms("", messageBuilder.toString());
         }
     }
 }

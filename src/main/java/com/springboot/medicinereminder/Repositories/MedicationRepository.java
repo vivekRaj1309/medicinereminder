@@ -9,6 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface MedicationRepository extends JpaRepository<Medicine, Integer> {
     Medicine findByName(String name);
     void deleteByName(String name);
-
     Medicine findByDuration(Duration existingDuration);
 }

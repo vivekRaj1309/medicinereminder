@@ -1,6 +1,5 @@
 package com.springboot.medicinereminder.dtos;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

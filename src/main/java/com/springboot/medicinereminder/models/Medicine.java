@@ -3,14 +3,17 @@ package com.springboot.medicinereminder.models;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 public class Medicine extends BaseModel{
     private String name;
+    private int dosage;
     @ManyToOne
     private Duration duration;
     @ManyToOne

@@ -2,8 +2,10 @@ package com.springboot.medicinereminder.Scheduler;
 
 import com.springboot.medicinereminder.Repositories.FrequencyRepository;
 
+import com.springboot.medicinereminder.Repositories.UserRepository;
 import com.springboot.medicinereminder.models.Frequency;
 import com.springboot.medicinereminder.models.Medicine;
+import com.springboot.medicinereminder.models.User;
 import com.springboot.medicinereminder.service.StockService;
 import com.springboot.medicinereminder.service.TwilioService;
 import jakarta.transaction.Transactional;
@@ -19,14 +21,18 @@ import java.util.List;
 @EnableScheduling
 public class NotificationService {
     @Autowired
+    UserRepository userRepository;
+    @Autowired
     StockService stockService;
     @Autowired
     FrequencyRepository frequencyRepository;
     @Autowired
     TwilioService twilioService;
+    User user = new User();
     @Transactional
     @Scheduled(cron = "0 * * * * *")
     public void sendMedicineReminder(){
+        user = userRepository.findById(1);
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
         Frequency currFrequency = frequencyRepository.findByTime(now);
         System.out.println(now);
@@ -38,14 +44,14 @@ public class NotificationService {
                 messageBuilder.append(medicine.getName() + " : " + medicine.getDosage() + ", ");
                 int currStock = medicine.getStock().getValue();
                 if(currStock < 10){
-                    twilioService.sendSms("+919958101066", "Kindly refill/restock "
+                    twilioService.sendSms(user.getContact(), "Kindly refill/restock "
                             + medicine.getName() + ". Current availability: " + currStock + " pills.");
                 } else if (currStock > 0) {
                     int newStock = currStock-medicine.getDosage();
                     stockService.updateStock(currStock, newStock, medicine);
                 }
             }
-            twilioService.sendSms("+919958101066", messageBuilder.toString());
+            twilioService.sendSms(user.getContact(), messageBuilder.toString());
         }
     }
 }

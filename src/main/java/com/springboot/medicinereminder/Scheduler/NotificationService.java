@@ -1,9 +1,10 @@
 package com.springboot.medicinereminder.Scheduler;
 
 import com.springboot.medicinereminder.Repositories.FrequencyRepository;
-import com.springboot.medicinereminder.Repositories.StockRepository;
+
 import com.springboot.medicinereminder.models.Frequency;
 import com.springboot.medicinereminder.models.Medicine;
+import com.springboot.medicinereminder.service.StockService;
 import com.springboot.medicinereminder.service.TwilioService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +13,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Component
 @EnableScheduling
-public class MedicationFrequencyScheduler {
+public class NotificationService {
     @Autowired
-    StockRepository stockRepository;
+    StockService stockService;
     @Autowired
     FrequencyRepository frequencyRepository;
     @Autowired
@@ -30,21 +29,23 @@ public class MedicationFrequencyScheduler {
     public void sendMedicineReminder(){
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
         Frequency currFrequency = frequencyRepository.findByTime(now);
+        System.out.println(now);
         if(currFrequency != null){
             StringBuilder messageBuilder = new StringBuilder("Reminder: Take the following medicines: ");
             List<Medicine> medicineList = currFrequency.getMedicines();
-            Set<Medicine> medicines = new HashSet<>(medicineList);
-            for(Medicine medicine:medicines){
+            for(Medicine medicine:medicineList){
+                System.out.println(medicine.getDuration().getStartDate());
                 messageBuilder.append(medicine.getName() + " : " + medicine.getDosage() + ", ");
                 int currStock = medicine.getStock().getValue();
                 if(currStock < 10){
-                    twilioService.sendSms("", "Kindly refill/restock " + medicine.getName() + ".");
+                    twilioService.sendSms("+919958101066", "Kindly refill/restock "
+                            + medicine.getName() + ". Current availability: " + currStock + " pills.");
                 } else if (currStock > 0) {
-                    int updatedStock = currStock-medicine.getDosage();
-                    stockRepository.
+                    int newStock = currStock-medicine.getDosage();
+                    stockService.updateStock(currStock, newStock, medicine);
                 }
             }
-            twilioService.sendSms("", messageBuilder.toString());
+            twilioService.sendSms("+919958101066", messageBuilder.toString());
         }
     }
 }

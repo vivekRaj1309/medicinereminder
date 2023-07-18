@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Medication Reminder</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+</head>
+<body class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+<div class="container">
+  <div class="border rounded p-4 shadow">
+    <h2 class="text-center mb-4">Add Medication Reminder</h2>
+    <form id="medicationForm">
+      <div class="form-group">
+        <label for="medicineName">Medicine Name:</label>
+        <input type="text" class="form-control" id="medicineName" required>
+      </div>
+      <div class="form-group">
+        <label for="dosage">Dosage:</label>
+        <input type="number" class="form-control" id="dosage" required>
+      </div>
+      <div class="form-group" id="frequencyList">
+        <label for="frequencyList">Frequency:</label>
+        <div class="input-group mb-3">
+          <input type="time" class="form-control" id="frequency1" required>
+          <div class="input-group-append">
+              <span class="input-group-text bg-primary text-white" id="addFrequency">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z" />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="startDate">Start Date:</label>
+        <input type="date" class="form-control" id="startDate" required>
+      </div>
+      <div class="form-group">
+        <label for="endDate">End Date:</label>
+        <input type="date" class="form-control" id="endDate" required>
+      </div>
+      <div class="form-group">
+        <label for="stockValue">Stock Value:</label>
+        <input type="number" class="form-control" id="stockValue" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Add Reminder</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $("#medicationForm").submit(function (event) {
+      event.preventDefault();
+      var medicineName = $("#medicineName").val();
+      var dosage = $("#dosage").val();
+      var frequencies = [];
+      console.log(frequencies);
+      $("[id^=frequency]").each(function () {
+        var frequency = $(this).val();
+        if(frequency != "") {
+          frequencies.push(frequency);
+        }
+      });
+      console.log(frequencies);
+      var startDate = $("#startDate").val();
+      var endDate = $("#endDate").val();
+      var stockValue = $("#stockValue").val();
+
+      var requestData = {
+        name: medicineName,
+        dosage: dosage,
+        frequencyList: frequencies,
+        startDate: startDate,
+        endDate: endDate,
+        stockValue: stockValue,
+      };
+
+      $.ajax({
+        url: "/medications/medication-reminders",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(requestData),
+        success: function (data) {
+          alert("Medication reminder added successfully!");
+        },
+        error: function (error) {
+          alert("Error adding medication reminder!");
+          console.log(error);
+        },
+      });
+    });
+    let frequencyInputCount = 1;
+    $("#addFrequency").click(function () {
+      var newFrequencyInput =
+        '<div class="input-group mb-3">' +
+        '<input type="time" class="form-control" id="frequency' + frequencyInputCount + '" required>' +
+        '<div class="input-group-append">' +
+        '<button class="btn btn-danger remove-frequency" type="button"><i class="fas fa-minus"></i></button>' +
+        '</div>' +
+        '</div>';
+      $("#frequencyList").append(newFrequencyInput);
+      frequencyInputCount++;
+    });
+
+    $("#frequencyList").on("click", ".remove-frequency", function () {
+      $(this).closest(".input-group").remove();
+    });
+  });
+</script>
+</body>
+</html>

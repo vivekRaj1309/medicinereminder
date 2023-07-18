@@ -13,8 +13,8 @@ import java.util.List;
 public class FrequencyService {
     @Autowired
     FrequencyRepository frequencyRepository;
-    private List<Frequency> frequencyList = new ArrayList<>();
     public List<Frequency> addNewFrequency(List<LocalTime> timeList) {
+        List<Frequency> frequencyList = new ArrayList<>();
         for(LocalTime localTime : timeList){
             Frequency existingFrequency = frequencyRepository.findByTime(localTime);
             if(existingFrequency == null){

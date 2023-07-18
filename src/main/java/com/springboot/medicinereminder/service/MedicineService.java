@@ -13,29 +13,31 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class MedicationService {
+public class MedicineService {
     @Autowired
     MedicationRepository medicationRepository;
 
     @Autowired
     private EntityManager entityManager;
-    public Medicine addNewMedication(String name, Duration duration, Stock stock) {
+    public Medicine addNewMedication(String name, Duration duration, Stock stock, int dosage) {
         Medicine existingMedicine = medicationRepository.findByName(name);
         if(existingMedicine == null){
             Medicine medicine = new Medicine();
             medicine.setName(name);
             medicine.setDuration(duration);
             medicine.setStock(stock);
+            medicine.setDosage(dosage);
             existingMedicine = medicationRepository.save(medicine);
         } else {
             existingMedicine.setDuration(duration);
             existingMedicine.setStock(stock);
+            existingMedicine.setDosage(dosage);
         }
         return existingMedicine;
     }
 
     public List<GetAllMedicationDto> getMedicineWithDurationStockAndFrequency(){
-        String jpql = "SELECT NEW com.springboot.medicinereminder.dtos.GetAllMedicationDto(m.name, f.time, d.startDate, d.endDate, s.value as stock) " +
+        String jpql = "SELECT NEW com.springboot.medicinereminder.dtos.GetAllMedicationDto(m.name, m.dosage, f.time, d.startDate, d.endDate, s.value as stock) " +
                 "FROM Medicine m " +
                 "JOIN m.duration d "+
                 "JOIN m.stock s " +
@@ -45,5 +47,8 @@ public class MedicationService {
         return query.getResultList();
     }
 
-
+    public void setUpdatedStockForMedicine(Medicine medicine, Stock updatedStock) {
+        medicine.setStock(updatedStock);
+        medicationRepository.save(medicine);
+    }
 }

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medications</title>
+  <!-- Link to Bootstrap CSS (you may need to adjust the path to your file) -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+  <body>
+  <div class="container mt-5">
+    <h2>Medications</h2>
+    <table class="table table-bordered table-striped">
+      <thead>
+      <tr>
+        <th>Medicine Name</th>
+        <th>Dosage</th>
+        <th>Time</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Stock</th>
+      </tr>
+      </thead>
+      <tbody id="medicationTableBody">
+      </tbody>
+    </table>
+    <a href="/medications/add-medication-reminder" class="btn btn-primary">Add New Medication</a>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    }
+    function fetchMedications() {
+      $.ajax({
+        url: '/medications/get-all-medications',
+        type: 'GET',
+        dataType: 'JSON',
+        success: function (data) {
+
+          $('#medicationTableBody').empty();
+
+          data.forEach(function (medications) {
+            var row = '<tr>' +
+              '<td>' + medications.medicineName + '</td>' +
+              '<td>' + medications.dosage + '</td>' +
+              '<td>' + medications.time + '</td>' +
+              '<td>' + formatDate(medications.startDate) + '</td>' +
+              '<td>' + formatDate(medications.endDate) + '</td>' +
+              '<td>' + medications.stock + '</td>' +
+              '</tr>';
+
+            // Append the row to the table body
+            $('#medicationTableBody').append(row);
+          });
+        },
+        error: function (error) {
+          console.log('Error fetching medication data:', error);
+        }
+      });
+    }
+
+    $(document).ready(function () {
+      fetchMedications();
+    });
+  </script>
+  </body>
